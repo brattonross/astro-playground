@@ -35,7 +35,7 @@ export function playground(
 						"utf-8",
 					),
 					fs.writeFile(
-						path.join(outDir, "playground.astro"),
+						path.join(outDir, "story.astro"),
 						generateStoryPage(options),
 						"utf-8",
 					),
@@ -95,7 +95,7 @@ const stories = files.map((story) => {
 ---
 
 ${baseHTML(
-	`<p style="margin: 0; color: var(--gray-11);">Select a story from the sidebar to get started.</p>`,
+	`<p style="margin: 0; color: var(--pg-gray-11);">Select a story from the sidebar to get started</p>`,
 )}
 `;
 }
@@ -142,6 +142,11 @@ function baseHTML(children: string) {
 	return `<!doctype html>
 <html lang="en">
 <head>
+	<script is:inline>
+		if (window.location.search.includes("dir=rtl")) {
+			document.documentElement.dir = "rtl";
+		}
+	</script>
 </head>
 <body>
 	<div id="__playground">
@@ -159,17 +164,90 @@ function baseHTML(children: string) {
 				</ul>
 			</nav>
 		</aside>
+		<header role="banner">
+			<ul>
+				<li>
+					<button is="pg-rtl-button" aria-label="Switch text direction to right to left." title="Switch text direction to right to left." role="button" type="button">
+						RTL
+					</button>
+				</li>
+			</ul>
+		</header>
 	</div>
+	<script>
+		class ToggleButton extends HTMLButtonElement {
+			public connectedCallback() {
+				this.setAttribute("aria-pressed", "false");
+				this.addEventListener("click", this.#handleClick);
+			}
+
+			public disconnectedCallback() {
+				this.removeEventListener("click", this.#handleClick);
+			}
+
+			#handleClick(event) {
+				const pressed = this.getAttribute("aria-pressed") === "true";
+				this.setAttribute("aria-pressed", String(!pressed));
+			}
+		}
+
+		class LeftToRightButton extends ToggleButton {
+			#observer = new MutationObserver(this.#handleMutation.bind(this));
+
+			public connectedCallback() {
+				super.connectedCallback();
+				this.setAttribute("aria-pressed", window.location.search.includes("dir=rtl") ? "true" : "false");
+				this.#observer.observe(this, { attributes: true });
+			}
+
+			public disconnectedCallback() {
+				super.disconnectedCallback();
+				this.#observer.disconnect();
+			}
+
+			#handleMutation(mutations) {
+				for (const mutation of mutations) {
+					if (mutation.attributeName === "aria-pressed") {
+						const pressed = this.getAttribute("aria-pressed") === "true";
+						const url = new URL(window.location.href);
+						if (pressed) {
+							document.documentElement.dir = "rtl";
+							url.searchParams.set("dir", "rtl");
+						} else {
+							document.documentElement.removeAttribute("dir");
+							url.searchParams.delete("dir");
+						}
+						window.history.pushState({}, "", url.toString());
+					}
+				}
+			}
+		}
+
+		window.customElements.define("pg-toggle-button", ToggleButton, { extends: "button" });
+		window.customElements.define("pg-rtl-button", LeftToRightButton, { extends: "button" });
+	</script>
 </body>
 </html>
 
 <style>
 /* Variables from https://www.radix-ui.com/colors */
 :root {
-	--gray-2: #f9f9f9;
-	--gray-11: #646464;
-	--gray-12: #202020;
-	--gray-a6: #00000026;
+	--pg-gray-2: #f9f9f9;
+	--pg-gray-11: #646464;
+	--pg-gray-12: #202020;
+	--pg-gray-a6: #00000026;
+
+	--pg-indigo-a3: #0047F112;
+	--pg-indigo-a5: #0044FF2D;
+	--pg-indigo-a7: #0037ED54;
+	--pg-indigo-11: #3A5BC7;
+
+	--pg-primary-a3: var(--pg-indigo-a3);
+	--pg-primary-a5: var(--pg-indigo-a5);
+	--pg-primary-a7: var(--pg-indigo-a7);
+	--pg-primary-11: var(--pg-indigo-11);
+
+	--pg-sidebar-width: 300px;
 }
 
 * {
@@ -186,7 +264,7 @@ body {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	background-color: white;
-	color: var(--gray-12);
+	color: var(--pg-gray-12);
 }
 
 #__playground {
@@ -200,10 +278,13 @@ body {
 	padding: 1.5rem;
 }
 #__playground > aside {
-	flex: 0 0 300px;
+	flex: 0 0 var(--pg-sidebar-width);
 	min-height: max-content;
-	box-shadow: -1px 0 var(--gray-a6);
-	background-color: var(--gray-2);
+	box-shadow: -1px 0 var(--pg-gray-a6);
+	background-color: var(--pg-gray-2);
+}
+[dir="rtl"] #__playground > aside {
+	box-shadow: 1px 0 var(--pg-gray-a6);
 }
 #__playground > aside nav {
 	padding: 1rem;
@@ -213,6 +294,61 @@ body {
 	list-style: none;
 	margin: 0;
 	padding: 0;
+}
+#__playground > header {
+	position: fixed;
+	padding: 0.5rem;
+	margin: 0 auto;
+	width: min(100%, 400px);
+	max-width: 100%;
+	left: 0;
+	right: var(--pg-sidebar-width);
+	bottom: 0;
+}
+[dir="rtl"] #__playground > header {
+	left: var(--pg-sidebar-width);
+	right: 0;
+}
+#__playground > header ul {
+	display: flex;
+	align-items: center;
+	column-gap: 0.5rem;
+	flex-direction: row;
+	list-style: none;
+	margin: 0;
+	padding: 0.25rem;
+	border-radius: 0.5rem;
+	border: 1px solid var(--pg-gray-a6);
+	box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+#__playground > header button {
+	appearance: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 2rem;
+	padding: 0 0.5rem;
+	font-weight: 500;
+	font-size: 0.75rem;
+	line-height: 1rem;
+	margin: 0;
+	border: none;
+	border-radius: 0.375rem;
+	color: var(--pg-gray-12);
+	background-color: transparent;
+	flex: 0 0 auto;
+}
+#__playground > header button:hover {
+	background-color: var(--pg-primary-a3);
+	color: var(--pg-primary-11);
+}
+#__playground > header button:focus {
+	outline: none;
+	box-shadow: 0 0 0 2px var(--pg-primary-a7);
+}
+#__playground > header button[aria-pressed="true"] {
+	background-color: var(--pg-primary-a5);
+	color: var(--pg-primary-11);
 }
 </style>`;
 }
