@@ -35,6 +35,7 @@ Things I'd like this integration to do:
 -   [ ] RTL support
 -   [ ] Dark mode switch
 -   [ ] Structured stories (e.g. Button > Primary, Secondary, Tertiary)
+-   [ ] Search stories
 -   [ ] [Visual Snapshots](https://ladle.dev/docs/visual-snapshots)
 -   [ ] Axe integration
 -   [ ] Show story source code
