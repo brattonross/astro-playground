@@ -1,0 +1,50 @@
+{
+	"$schema": "https://json.schemastore.org/package.json",
+	"name": "@brattonross/astro-playground",
+	"version": "0.1.0",
+	"type": "module",
+	"author": {
+		"name": "Ross Bratton",
+		"email": "bratton.ross@gmail.com",
+		"url": "https://brattonross.xyz"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/brattonross/astro-playground.git",
+		"directory": "packages/playground"
+	},
+	"keywords": [
+		"astro",
+		"astro-integration",
+		"playground",
+		"testing"
+	],
+	"bugs": {
+		"url": "https://github.com/brattonross/astro-playground/issues",
+		"email": "bratton.ross@gmail.com"
+	},
+	"homepage": "https://github.com/brattonross/astro-playground",
+	"license": "MIT",
+	"files": [
+		"dist"
+	],
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		},
+		"./index.astro": "./dist/index.astro",
+		"./story.astro": "./dist/story.astro"
+	},
+	"scripts": {
+		"build": "tsup",
+		"dev": "tsup --watch"
+	},
+	"devDependencies": {
+		"@types/node": "^20.8.10",
+		"astro": "^3.4.3",
+		"tsup": "^7.2.0"
+	}
+}

@@ -1,0 +1,29 @@
+{
+	"$schema": "https://json.schemastore.org/package.json",
+	"name": "astro-playground-monorepo",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"author": {
+		"name": "Ross Bratton",
+		"email": "bratton.ross@gmail.com",
+		"url": "https://brattonross.xyz"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/brattonross/astro-playground.git"
+	},
+	"license": "MIT",
+	"scripts": {
+		"build": "turbo build",
+		"dev": "turbo dev",
+		"format": "prettier --ignore-path .gitignore --write ."
+	},
+	"devDependencies": {
+		"prettier": "^3.0.3",
+		"prettier-plugin-astro": "^0.12.1",
+		"prettier-plugin-tailwindcss": "^0.5.6",
+		"turbo": "^1.10.16",
+		"typescript": "^5.2.2"
+	}
+}
