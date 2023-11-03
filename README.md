@@ -33,7 +33,7 @@ Any `.stories.astro` files in `src` will be picked up as "story" files. These wi
 Things I'd like this integration to do:
 
 -   [x] RTL support
--   [ ] Dark mode switch
+-   [x] Dark mode switch
 -   [ ] Structured stories (e.g. Button > Primary, Secondary, Tertiary)
 -   [ ] Search stories
 -   [ ] [Visual Snapshots](https://ladle.dev/docs/visual-snapshots)

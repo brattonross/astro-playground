@@ -146,6 +146,10 @@ function baseHTML(children: string) {
 		if (window.location.search.includes("dir=rtl")) {
 			document.documentElement.dir = "rtl";
 		}
+
+		if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+			document.documentElement.dataset.theme = "dark";
+		}
 	</script>
 </head>
 <body>
@@ -169,6 +173,21 @@ function baseHTML(children: string) {
 				<li>
 					<button is="pg-rtl-button" aria-label="Switch text direction to right to left." title="Switch text direction to right to left." role="button" type="button">
 						RTL
+					</button>
+				</li>
+				<li>
+					<button is="pg-dark-mode-button" aria-label="Toggle dark mode." title="Toggle dark mode." role="button" type="button">
+						<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun-medium">
+							<circle cx="12" cy="12" r="4"/>
+							<path d="M12 3v1"/>
+							<path d="M12 20v1"/>
+							<path d="M3 12h1"/>
+							<path d="M20 12h1"/>
+							<path d="m18.364 5.636-.707.707"/>
+							<path d="m6.343 17.657-.707.707"/>
+							<path d="m5.636 5.636.707.707"/>
+							<path d="m17.657 17.657.707.707"/>
+						</svg>
 					</button>
 				</li>
 			</ul>
@@ -223,8 +242,41 @@ function baseHTML(children: string) {
 			}
 		}
 
+		class DarkModeButton extends ToggleButton {
+			#observer = new MutationObserver(this.#handleMutation.bind(this));
+
+			public connectedCallback() {
+				super.connectedCallback();
+				this.setAttribute("aria-pressed", window.matchMedia("(prefers-color-scheme: dark)").matches ? "true" : "false");
+				this.#observer.observe(this, { attributes: true });
+			}
+
+			public disconnectedCallback() {
+				super.disconnectedCallback();
+				this.#observer.disconnect();
+			}
+
+			#handleMutation(mutations) {
+				for (const mutation of mutations) {
+					if (mutation.attributeName === "aria-pressed") {
+						const pressed = this.getAttribute("aria-pressed") === "true";
+						const url = new URL(window.location.href);
+						if (pressed) {
+							document.documentElement.dataset.theme = "dark";
+							url.searchParams.set("dark", "true");
+						} else {
+							document.documentElement.removeAttribute("data-theme");
+							url.searchParams.delete("dark");
+						}
+						window.history.pushState({}, "", url.toString());
+					}
+				}
+			}
+		}
+
 		window.customElements.define("pg-toggle-button", ToggleButton, { extends: "button" });
 		window.customElements.define("pg-rtl-button", LeftToRightButton, { extends: "button" });
+		window.customElements.define("pg-dark-mode-button", DarkModeButton, { extends: "button" });
 	</script>
 </body>
 </html>
@@ -232,6 +284,8 @@ function baseHTML(children: string) {
 <style>
 /* Variables from https://www.radix-ui.com/colors */
 :root {
+	--pg-white: #ffffff;
+	
 	--pg-gray-2: #f9f9f9;
 	--pg-gray-11: #646464;
 	--pg-gray-12: #202020;
@@ -247,7 +301,23 @@ function baseHTML(children: string) {
 	--pg-primary-a7: var(--pg-indigo-a7);
 	--pg-primary-11: var(--pg-indigo-11);
 
+	--pg-bg: var(--pg-white);
 	--pg-sidebar-width: 300px;
+}
+
+[data-theme="dark"] {
+	--pg-gray-1: #111111;
+	--pg-gray-2: #191919;
+	--pg-gray-11: #B4B4B4;
+	--pg-gray-12: #EEEEEE;
+	--pg-gray-a6: #FFFFFF2C;
+
+	--pg-indigo-a3: #2F62FF3C;
+	--pg-indigo-a5: #4171FD6B;
+	--pg-indigo-a7: #5A7FFF90;
+	--pg-indigo-11: #9EB1FF;
+
+	--pg-bg: var(--pg-gray-1);
 }
 
 * {
@@ -263,7 +333,7 @@ html, body {
 body {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-	background-color: white;
+	background-color: var(--pg-bg);
 	color: var(--pg-gray-12);
 }
 
@@ -312,7 +382,7 @@ body {
 #__playground > header ul {
 	display: flex;
 	align-items: center;
-	column-gap: 0.5rem;
+	column-gap: 0.25rem;
 	flex-direction: row;
 	list-style: none;
 	margin: 0;
