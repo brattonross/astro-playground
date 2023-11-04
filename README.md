@@ -28,13 +28,20 @@ If you navigate to `/playground`, you should see the playground page. By default
 
 Any `.stories.astro` files in `src` will be picked up as "story" files. These will appear as nav items on the sidebar, and render the contents of the file in the main area when selected.
 
+## Structured Stories
+
+Components can be organized into a tree structure by using `--` in the filename to indicate a nested story. For example, the filename `Components--Buttons--Primary.astro` would result in a tree like:
+
+```txt
+Components
+└── Buttons
+    └── Primary
+```
+
 ## TODO
 
 Things I'd like this integration to do:
 
--   [x] RTL support
--   [x] Dark mode switch
--   [ ] Structured stories (e.g. Button > Primary, Secondary, Tertiary)
 -   [ ] Search stories
 -   [ ] [Visual Snapshots](https://ladle.dev/docs/visual-snapshots)
 -   [ ] Axe integration
