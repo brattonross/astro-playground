@@ -29,7 +29,7 @@ const { story, ...props } = Astro.props;
 		</li>
 	) : (
 		<li role="treeitem" title={story.label} {...props}>
-			<a href={story.href}>
+			<a href={story.href} tabindex="-1">
 				<svg
 					aria-hidden="true"
 					width="16"
@@ -64,7 +64,9 @@ const { story, ...props } = Astro.props;
 		) {
 			node.tabIndex = -1;
 			node.setAttribute("role", "treeitem");
-			node.setAttribute("aria-expanded", "false");
+			if (node.querySelector("ul[role='group']")) {
+				node.setAttribute("aria-expanded", "false");
+			}
 			this.#addEventListeners();
 			this.inGroup = group !== null;
 
