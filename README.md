@@ -45,7 +45,6 @@ Things I'd like this integration to do:
 -   [ ] Search stories
 -   [ ] [Visual Snapshots](https://ladle.dev/docs/visual-snapshots)
 -   [ ] Axe integration
--   [ ] Show story source code
 
 ## Prior Art
 

@@ -119,6 +119,7 @@ ${baseHTML(
 
 function generateStoryPage(options: PlaygroundOptions) {
 	return `---
+import { promises as fs } from "node:fs";
 import path from "node:path";
 import TreeItem from "./tree-item.astro";
 
@@ -170,6 +171,7 @@ export async function getStaticPaths() {
 }
 
 const { stories, story } = Astro.props;
+const storySource = await fs.readFile(story.file, "utf-8");
 ---
 
 ${baseHTML(`<story.default />`)}`;
@@ -246,9 +248,30 @@ function baseHTML(children: string) {
 						RTL
 					</button>
 				</li>
+				<li>
+					<button is="pg-show-source-button" aria-label="Toggle show source." disabled={typeof storySource !== "string"} title="Toggle show source." role="button" type="button">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="m18 16 4-4-4-4"/>
+							<path d="m6 8-4 4 4 4"/>
+							<path d="m14.5 4-5 16"/>
+						</svg>
+					</button>
+				</li>
 			</ul>
 		</header>
 	</div>
+
+	<dialog id="__playground-source-dialog">
+		<button type="button" aria-label="Close source dialog." title="Close source dialog." onclick="document.getElementById('__playground-source-dialog').close()">
+			<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M18 6l-6 6 6 6"/>
+				<path d="M6 6l6 6-6 6"/>
+			</svg>
+		</button>
+		<p>Source for <code>{story.file.slice(story.file.indexOf("/src/") + 1)}</code></p>
+		<pre><code>{storySource}</code></pre>
+	</dialog>
+
 	<script>
 		class ToggleButton extends HTMLButtonElement {
 			public connectedCallback() {
@@ -334,9 +357,45 @@ function baseHTML(children: string) {
 			}
 		}
 
+		class ShowSourceButton extends ToggleButton {
+			#dialog = document.getElementById("__playground-source-dialog");
+			#observer = new MutationObserver(this.#handleMutation.bind(this));
+
+			public connectedCallback() {
+				super.connectedCallback();
+				this.#observer.observe(this, { attributes: true });
+				this.#dialog.addEventListener("close", this.#handleClose.bind(this));
+			}
+
+			public disconnectedCallback() {
+				super.disconnectedCallback();
+				this.#observer.disconnect();
+				this.#dialog.removeEventListener("close", this.#handleClose.bind(this));
+			}
+
+			#handleClose() {
+				this.setAttribute("aria-pressed", "false");
+			}
+
+			#handleMutation(mutations) {
+				for (const mutation of mutations) {
+					if (mutation.attributeName === "aria-pressed") {
+						const pressed = this.getAttribute("aria-pressed") === "true";
+						const dialog = document.getElementById("__playground-source-dialog");
+						if (pressed) {
+							dialog.showModal();
+						} else {
+							dialog.close();
+						}
+					}
+				}
+			}
+		}
+
 		window.customElements.define("pg-toggle-button", ToggleButton, { extends: "button" });
 		window.customElements.define("pg-rtl-button", LeftToRightButton, { extends: "button" });
 		window.customElements.define("pg-dark-mode-button", DarkModeButton, { extends: "button" });
+		window.customElements.define("pg-show-source-button", ShowSourceButton, { extends: "button" });
 	</script>
 </body>
 </html>
@@ -349,7 +408,11 @@ function baseHTML(children: string) {
 	--pg-gray-2: #f9f9f9;
 	--pg-gray-11: #646464;
 	--pg-gray-12: #202020;
+	--pg-gray-a3: #0000000F;
+	--pg-gray-a4: #00000017;
+	--pg-gray-a5: #0000001F;
 	--pg-gray-a6: #00000026;
+	--pg-gray-a8: #00000044;
 
 	--pg-indigo-a3: #0047F112;
 	--pg-indigo-a4: #0044FF1E;
@@ -374,7 +437,11 @@ function baseHTML(children: string) {
 	--pg-gray-2: #191919;
 	--pg-gray-11: #B4B4B4;
 	--pg-gray-12: #EEEEEE;
+	--pg-gray-a3: #FFFFFF12;
+	--pg-gray-a4: #FFFFFF1B;
+	--pg-gray-a5: #FFFFFF22;
 	--pg-gray-a6: #FFFFFF2C;
+	--pg-gray-a8: #FFFFFF55;
 
 	--pg-indigo-a3: #2F62FF3C;
 	--pg-indigo-a4: #3566FF57;
@@ -485,6 +552,63 @@ body {
 #__playground > header button[aria-pressed="true"] {
 	background-color: var(--pg-primary-a5);
 	color: var(--pg-primary-11);
+}
+#__playground > header button:disabled {
+	background-color: var(--pg-gray-a3);
+	color: var(--pg-gray-a8);
+	cursor: not-allowed;
+}
+dialog {
+	background-color: var(--pg-gray-2);
+	color: var(--pg-gray-12);
+	border-radius: 0.375rem;
+	border: 1px solid var(--pg-gray-a6);
+	width: min(100%, 800px);
+	max-width: 100%;
+	height: min(100%, 600px);
+	max-height: 100%;
+}
+dialog button {
+	position: absolute;
+	top: 0.25rem;
+	right: 0.25rem;
+	width: 25px;
+	height: 25px;
+	background-color: transparent;
+	border: none;
+	color: var(--pg-gray-11);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	outline: none;
+	border-radius: 0.25rem;
+}
+dialog button:hover {
+	color: var(--pg-gray-12);
+	background-color: var(--pg-gray-a4);
+}
+dialog button:active {
+	color: var(--pg-gray-12);
+	background-color: var(--pg-gray-a5);
+}
+dialog button:focus-visible {
+	outline: 2px solid var(--pg-primary-a8);
+	outline-offset: -1px;
+}
+dialog p {
+	margin: 0;
+	font-size: 0.875rem;
+	font-weight: 500;
+}
+dialog p code {
+	padding: 0.125rem 0.25rem;
+	border-radius: 0.25rem;
+	background-color: var(--pg-gray-a3);
+	color: var(--pg-gray-11);
+	border: 1px solid var(--pg-gray-a6);
+}
+dialog pre {
+	overflow: auto;
 }
 </style>`;
 }

@@ -46,5 +46,8 @@
 		"@types/node": "^20.8.10",
 		"astro": "^3.4.3",
 		"tsup": "^7.2.0"
+	},
+	"dependencies": {
+		"@floating-ui/dom": "^1.5.3"
 	}
 }
