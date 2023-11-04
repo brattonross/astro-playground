@@ -29,7 +29,7 @@ const { story, ...props } = Astro.props;
 		</li>
 	) : (
 		<li role="treeitem" title={story.label} {...props}>
-			<a href={story.href} tabindex="-1">
+			<a is="pg-anchor" href={story.href} tabindex="-1">
 				<svg
 					aria-hidden="true"
 					width="16"
@@ -467,7 +467,25 @@ const { story, ...props } = Astro.props;
 		}
 	}
 
+	class Anchor extends HTMLAnchorElement {
+		public connectedCallback() {
+			this.addEventListener("click", this.#handleClick.bind(this));
+		}
+
+		public disconnectedCallback() {
+			this.removeEventListener("click", this.#handleClick.bind(this));
+		}
+
+		#handleClick(event: MouseEvent) {
+			event.preventDefault();
+			const params = new URLSearchParams(window.location.search);
+			const newUrl = this.href + "?" + params.toString();
+			window.location.href = newUrl;
+		}
+	}
+
 	window.customElements.define("pg-tree", Tree, { extends: "ul" });
+	window.customElements.define("pg-anchor", Anchor, { extends: "a" });
 </script>
 
 <style>

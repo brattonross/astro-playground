@@ -184,7 +184,11 @@ function baseHTML(children: string) {
 			document.documentElement.dir = "rtl";
 		}
 
-		if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+		if (window.location.search.includes("dark=true")) {
+			document.documentElement.dataset.theme = "dark";
+		} else if (window.location.search.includes("dark=false")) {
+			document.documentElement.removeAttribute("data-theme");
+		} else {
 			document.documentElement.dataset.theme = "dark";
 		}
 	</script>
@@ -223,11 +227,6 @@ function baseHTML(children: string) {
 		<header role="banner">
 			<ul>
 				<li>
-					<button is="pg-rtl-button" aria-label="Switch text direction to right to left." title="Switch text direction to right to left." role="button" type="button">
-						RTL
-					</button>
-				</li>
-				<li>
 					<button is="pg-dark-mode-button" aria-label="Toggle dark mode." title="Toggle dark mode." role="button" type="button">
 						<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun-medium">
 							<circle cx="12" cy="12" r="4"/>
@@ -240,6 +239,11 @@ function baseHTML(children: string) {
 							<path d="m5.636 5.636.707.707"/>
 							<path d="m17.657 17.657.707.707"/>
 						</svg>
+					</button>
+				</li>
+				<li>
+					<button is="pg-rtl-button" aria-label="Toggle text direction." title="Toggle text direction." role="button" type="button">
+						RTL
 					</button>
 				</li>
 			</ul>
@@ -299,7 +303,11 @@ function baseHTML(children: string) {
 
 			public connectedCallback() {
 				super.connectedCallback();
-				this.setAttribute("aria-pressed", window.matchMedia("(prefers-color-scheme: dark)").matches ? "true" : "false");
+				let isDark = window.location.search.includes("dark=true");
+				if (!window.location.search.includes("dark=false")) {
+					isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+				}
+				this.setAttribute("aria-pressed", String(isDark));
 				this.#observer.observe(this, { attributes: true });
 			}
 
@@ -318,7 +326,7 @@ function baseHTML(children: string) {
 							url.searchParams.set("dark", "true");
 						} else {
 							document.documentElement.removeAttribute("data-theme");
-							url.searchParams.delete("dark");
+							url.searchParams.set("dark", "false");
 						}
 						window.history.pushState({}, "", url.toString());
 					}
