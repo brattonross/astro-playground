@@ -53,17 +53,6 @@ const { story, ...props } = Astro.props;
 <script>
 	// Based on https://www.w3.org/WAI/ARIA/apg/patterns/treeview/examples/treeview-1a/
 	class Treeitem {
-		static #handledKeys = [
-			" ",
-			"Enter",
-			"ArrowUp",
-			"ArrowDown",
-			"ArrowLeft",
-			"ArrowRight",
-			"Home",
-			"End",
-		];
-
 		public isExpandable = false;
 		public isVisible = false;
 		public inGroup = false;
@@ -136,61 +125,95 @@ const { story, ...props } = Astro.props;
 		}
 
 		#handleKeydown(event: KeyboardEvent) {
-			if (
-				!Treeitem.#handledKeys.includes(event.key) ||
-				event.altKey ||
-				event.ctrlKey ||
-				event.metaKey
-			) {
+			let handled = false;
+			let char = event.key;
+
+			function isPrintableCharacter(str: string) {
+				return str.length === 1 && str.match(/\S/);
+			}
+
+			function printableCharacter(item: Treeitem): void {
+				if (char === "*") {
+					item.tree.expandAllSiblingItems(item);
+					handled = true;
+				} else if (isPrintableCharacter(char)) {
+					item.tree.focusByFirstCharacter(item, char);
+					handled = true;
+				}
+			}
+
+			if (event.altKey || event.ctrlKey || event.metaKey) {
 				return;
 			}
 
-			event.preventDefault();
-			event.stopPropagation();
-
-			switch (event.key) {
-				case " ":
-				case "Enter":
-					if (this.isExpandable) {
-						this.tree.expandItem(this);
-					} else {
-						this.node.querySelector("a")?.click();
-					}
-					break;
-
-				case "ArrowUp":
-					this.tree.focusPreviousItem(this);
-					break;
-
-				case "ArrowDown":
-					this.tree.focusNextItem(this);
-					break;
-
-				case "ArrowRight":
-					if (this.isExpandable) {
-						if (this.isExpanded) {
-							this.tree.focusNextItem(this);
-						} else {
+			if (event.shiftKey) {
+				if (isPrintableCharacter(char)) {
+					printableCharacter(this);
+				}
+			} else {
+				switch (event.key) {
+					case " ":
+					case "Enter":
+						if (this.isExpandable) {
 							this.tree.expandItem(this);
+						} else {
+							this.node.querySelector("a")?.click();
 						}
-					}
-					break;
+						handled = true;
+						break;
 
-				case "ArrowLeft":
-					if (this.isExpandable && this.isExpanded) {
-						this.tree.collapseItem(this);
-					} else if (this.inGroup) {
-						this.tree.focusParentItem(this);
-					}
-					break;
+					case "ArrowUp":
+						this.tree.focusPreviousItem(this);
+						handled = true;
+						break;
 
-				case "Home":
-					this.tree.focusFirstItem();
-					break;
+					case "ArrowDown":
+						this.tree.focusNextItem(this);
+						handled = true;
+						break;
 
-				case "End":
-					this.tree.focusLastItem();
-					break;
+					case "ArrowRight":
+						if (this.isExpandable) {
+							if (this.isExpanded) {
+								this.tree.focusNextItem(this);
+							} else {
+								this.tree.expandItem(this);
+							}
+						}
+						handled = true;
+						break;
+
+					case "ArrowLeft":
+						if (this.isExpandable && this.isExpanded) {
+							this.tree.collapseItem(this);
+							handled = true;
+						} else if (this.inGroup) {
+							this.tree.focusParentItem(this);
+							handled = true;
+						}
+						break;
+
+					case "Home":
+						this.tree.focusFirstItem();
+						handled = true;
+						break;
+
+					case "End":
+						this.tree.focusLastItem();
+						handled = true;
+						break;
+
+					default:
+						if (isPrintableCharacter(char)) {
+							printableCharacter(this);
+						}
+						break;
+				}
+			}
+
+			if (handled) {
+				event.preventDefault();
+				event.stopPropagation();
 			}
 		}
 	}
@@ -199,6 +222,7 @@ const { story, ...props } = Astro.props;
 		#treeitems: Array<Treeitem> = [];
 		#firstTreeitem: Treeitem | null = null;
 		#lastTreeitem: Treeitem | null = null;
+		#firstChars: Array<string> = [];
 
 		public connectedCallback(): void {
 			this.setAttribute("role", "tree");
@@ -264,6 +288,19 @@ const { story, ...props } = Astro.props;
 
 			treeitem.node.setAttribute("aria-expanded", "true");
 			this.#updateVisibleItems();
+		}
+
+		public expandAllSiblingItems(item: Treeitem): void {
+			for (let i = 0; i < this.#treeitems.length; i++) {
+				const treeitem = this.#treeitems[i];
+				if (!treeitem) {
+					continue;
+				}
+
+				if (treeitem.group === item.group && treeitem.isExpandable) {
+					this.expandItem(treeitem);
+				}
+			}
 		}
 
 		public focusItem(treeitem: Treeitem): void {
@@ -346,6 +383,38 @@ const { story, ...props } = Astro.props;
 			}
 		}
 
+		public focusByFirstCharacter(treeitem: Treeitem, char: string): void {
+			let start: number, index: number;
+			char = char.toLowerCase();
+
+			start = this.#treeitems.indexOf(treeitem) + 1;
+			if (start === this.#treeitems.length) {
+				start = 0;
+			}
+
+			index = this.#findIndexMatchingChars(start, char);
+			if (index === -1) {
+				index = this.#findIndexMatchingChars(0, char);
+			}
+
+			const item = this.#treeitems[index];
+			if (item) {
+				this.focusItem(item);
+			}
+		}
+
+		#findIndexMatchingChars(startIndex: number, char: string): number {
+			for (let i = startIndex; i < this.#firstChars.length; i++) {
+				if (
+					this.#treeitems[i]?.isVisible &&
+					this.#firstChars[i] === char
+				) {
+					return i;
+				}
+			}
+			return -1;
+		}
+
 		#findTreeitems(
 			node: HTMLElement,
 			tree: Tree,
@@ -358,6 +427,9 @@ const { story, ...props } = Astro.props;
 				if (el.tagName.toLowerCase() === "li") {
 					treeitem = new Treeitem(el, tree, group);
 					this.#treeitems.push(treeitem);
+					this.#firstChars.push(
+						el.textContent?.trim().charAt(0).toLowerCase() ?? "",
+					);
 				}
 
 				if (el.firstElementChild) {
