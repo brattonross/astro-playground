@@ -205,7 +205,7 @@ function baseHTML(children: string) {
 			} else {
 				document.addEventListener("DOMContentLoaded", uncloak);
 			}
-		})()
+		})();
 	</script>
 </head>
 <body>

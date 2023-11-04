@@ -205,8 +205,27 @@ const { story, ...props } = Astro.props;
 
 			this.#findTreeitems(this, this, null);
 			this.#updateVisibleItems();
+
 			if (this.#firstTreeitem) {
 				this.#firstTreeitem.node.tabIndex = 0;
+			}
+
+			const anchor = this.querySelector(
+				`a[href="${window.location.pathname}"]`,
+			);
+			if (anchor) {
+				const treeitem = this.#treeitems.find(
+					(item) => item.node === anchor.parentElement,
+				);
+				if (treeitem) {
+					let group = treeitem.group;
+					while (group) {
+						this.expandItem(group);
+						group = group.group;
+					}
+					this.expandItem(treeitem);
+					this.focusItem(treeitem);
+				}
 			}
 		}
 
