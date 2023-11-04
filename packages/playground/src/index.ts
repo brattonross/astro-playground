@@ -260,18 +260,18 @@ function baseHTML(children: string) {
 			</ul>
 		</header>
 	</div>
-
-	<dialog id="__playground-source-dialog">
-		<button type="button" aria-label="Close source dialog." title="Close source dialog." onclick="document.getElementById('__playground-source-dialog').close()">
-			<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M18 6l-6 6 6 6"/>
-				<path d="M6 6l6 6-6 6"/>
-			</svg>
-		</button>
-		<p>Source for <code>{story.file.slice(story.file.indexOf("/src/") + 1)}</code></p>
-		<pre><code>{storySource}</code></pre>
-	</dialog>
-
+	{typeof story !== "undefined" ? (
+		<dialog id="__playground-source-dialog">
+			<button type="button" aria-label="Close source dialog." title="Close source dialog." onclick="document.getElementById('__playground-source-dialog').close()">
+				<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M18 6l-6 6 6 6"/>
+					<path d="M6 6l6 6-6 6"/>
+				</svg>
+			</button>
+			<p>Source for <code>{story.file.slice(story.file.indexOf("/src/") + 1)}</code></p>
+			<pre><code>{storySource}</code></pre>
+		</dialog>
+	) : null}
 	<script>
 		class ToggleButton extends HTMLButtonElement {
 			public connectedCallback() {
