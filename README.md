@@ -30,7 +30,7 @@ Any `.stories.astro` files in `src` will be picked up as "story" files. These wi
 
 ## Structured Stories
 
-Components can be organized into a tree structure by using `--` in the filename to indicate a nested story. For example, the filename `Components--Buttons--Primary.astro` would result in a tree like:
+Components can be organized into a tree structure by using `--` in the filename to indicate a nested story. For example, the filename `Components--Buttons--Primary.stories.astro` would result in a tree like:
 
 ```txt
 Components
