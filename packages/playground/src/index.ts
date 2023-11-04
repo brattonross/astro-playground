@@ -74,6 +74,7 @@ function resolveOptions(options: UserPlaygroundOptions): PlaygroundOptions {
 function generateIndexPage(options: PlaygroundOptions) {
 	return `---
 import path from "node:path";
+import TreeItem from "./tree-item.astro";
 
 function kebabCase(str) {
 	return str.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
@@ -85,13 +86,29 @@ function titleCase(str) {
 		.join(" ");
 }
 const files = await Astro.glob("${options.stories}");
-const stories = files.map((story) => {
-	const slug = kebabCase(path.basename(story.file, ".stories.astro"));
-	return {
-		label: titleCase(slug),
-		href: "${options.path}" + "/" + slug,
-	};
-});
+const stories = [];
+function parse(list, filename, currentPath = "/") {
+	const nextSplitIndex = filename.indexOf("--");
+	if (nextSplitIndex === -1) {
+		const slug = kebabCase(path.basename(filename, ".stories.astro"));
+		list.push({
+			label: titleCase(slug),
+			href: "${options.path}" + currentPath + slug,
+		});
+	} else {
+		const groupName = kebabCase(filename.slice(0, nextSplitIndex));
+		const remainder = filename.slice(nextSplitIndex + 2);
+		let group = list.find((item) => item.label === titleCase(groupName) && "stories" in item);
+		if (!group) {
+			group = { label: titleCase(groupName), stories: [] }
+			list.push(group);
+		}
+		parse(group.stories, remainder, currentPath + groupName + "/");
+	}
+}
+for (let i = 0; i < files.length; i++) {
+	parse(stories, path.basename(files[i].file));
+}
 ---
 
 ${baseHTML(
@@ -103,6 +120,7 @@ ${baseHTML(
 function generateStoryPage(options: PlaygroundOptions) {
 	return `---
 import path from "node:path";
+import TreeItem from "./tree-item.astro";
 
 export async function getStaticPaths() {
 	function kebabCase(str) {
@@ -114,19 +132,38 @@ export async function getStaticPaths() {
 			.map((word) => word[0].toUpperCase() + word.slice(1))
 			.join(" ");
 	}
-	const stories = await Astro.glob("${options.stories}");
-	return stories.map((story) => {
-		const slug = kebabCase(path.basename(story.file, ".stories.astro"));
+	const files = await Astro.glob("${options.stories}");
+	const stories = [];
+	function parse(list, filename, currentPath = "/") {
+		const nextSplitIndex = filename.indexOf("--");
+		if (nextSplitIndex === -1) {
+			const slug = kebabCase(path.basename(filename, ".stories.astro"));
+			list.push({
+				label: titleCase(slug),
+				href: "${options.path}" + currentPath + slug,
+			});
+		} else {
+			const groupName = kebabCase(filename.slice(0, nextSplitIndex));
+			const remainder = filename.slice(nextSplitIndex + 2);
+			let group = list.find((item) => item.label === titleCase(groupName) && "stories" in item);
+			if (!group) {
+				group = { label: titleCase(groupName), stories: [] }
+				list.push(group);
+			}
+			parse(group.stories, remainder, currentPath + groupName + "/");
+		}
+	}
+	for (let i = 0; i < files.length; i++) {
+		parse(stories, path.basename(files[i].file));
+	}
+	return files.map((file) => {
+		const parts = path.basename(file.file, ".stories.astro").split("--");
+		const slug = parts.map(kebabCase).join("/");
 		return {
 			params: { slug },
 			props: {
-				stories: stories.map((s) => {
-					return {
-						label: titleCase(slug),
-						href: "${options.path}" + "/" + slug,
-					};
-				}),
-				story
+				stories,
+				story: file,
 			},
 		};
 	});
@@ -151,6 +188,25 @@ function baseHTML(children: string) {
 			document.documentElement.dataset.theme = "dark";
 		}
 	</script>
+	<style id="__playground-nav-cloak" is:inline>
+		#__playground > aside > nav > ul[role="tree"] > li[role="treeitem"] > ul[role="group"] {
+			display: none;
+		}
+	</style>
+	<script is:inline>
+		(function() {
+			function uncloak() {
+				const style = document.getElementById("__playground-nav-cloak");
+				style.remove();
+			}
+
+			if (document.readyState === "complete") {
+				uncloak();
+			} else {
+				document.addEventListener("DOMContentLoaded", uncloak);
+			}
+		})()
+	</script>
 </head>
 <body>
 	<div id="__playground">
@@ -159,12 +215,8 @@ function baseHTML(children: string) {
 		</main>
 		<aside>
 			<nav>
-				<ul role="tree">
-					{stories.map((story) => (
-						<li role="treeitem" title={story.label}>
-							<a href={story.href}>{story.label}</a>
-						</li>
-					))}
+				<ul is="pg-tree" role="tree">
+					{stories.map((story) => <TreeItem story={story} />)}
 				</ul>
 			</nav>
 		</aside>
@@ -292,13 +344,17 @@ function baseHTML(children: string) {
 	--pg-gray-a6: #00000026;
 
 	--pg-indigo-a3: #0047F112;
+	--pg-indigo-a4: #0044FF1E;
 	--pg-indigo-a5: #0044FF2D;
 	--pg-indigo-a7: #0037ED54;
+	--pg-indigo-a8: #0034DC72;
 	--pg-indigo-11: #3A5BC7;
 
 	--pg-primary-a3: var(--pg-indigo-a3);
+	--pg-primary-a4: var(--pg-indigo-a4);
 	--pg-primary-a5: var(--pg-indigo-a5);
 	--pg-primary-a7: var(--pg-indigo-a7);
+	--pg-primary-a8: var(--pg-indigo-a8);
 	--pg-primary-11: var(--pg-indigo-11);
 
 	--pg-bg: var(--pg-white);
@@ -313,8 +369,10 @@ function baseHTML(children: string) {
 	--pg-gray-a6: #FFFFFF2C;
 
 	--pg-indigo-a3: #2F62FF3C;
+	--pg-indigo-a4: #3566FF57;
 	--pg-indigo-a5: #4171FD6B;
 	--pg-indigo-a7: #5A7FFF90;
+	--pg-indigo-a8: #5B81FEAC;
 	--pg-indigo-11: #9EB1FF;
 
 	--pg-bg: var(--pg-gray-1);

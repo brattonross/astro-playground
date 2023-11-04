@@ -1,0 +1,422 @@
+---
+const { story, ...props } = Astro.props;
+---
+
+{
+	story.stories ? (
+		<li role="treeitem" title={story.label} {...props}>
+			<span data-group-trigger title={story.label}>
+				<svg
+					aria-hidden="true"
+					width="16"
+					height="16"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path d="m9 18 6-6-6-6" />
+				</svg>
+				{story.label}
+			</span>
+			<ul role="group">
+				{story.stories.map((child: any) => (
+					<Astro.self story={child} />
+				))}
+			</ul>
+		</li>
+	) : (
+		<li role="treeitem" title={story.label} {...props}>
+			<a href={story.href}>
+				<svg
+					aria-hidden="true"
+					width="16"
+					height="16"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+					<polyline points="14 2 14 8 20 8" />
+				</svg>
+				{story.label}
+			</a>
+		</li>
+	)
+}
+
+<script>
+	// Based on https://www.w3.org/WAI/ARIA/apg/patterns/treeview/examples/treeview-1a/
+	class Treeitem {
+		static #handledKeys = [
+			" ",
+			"Enter",
+			"ArrowUp",
+			"ArrowDown",
+			"ArrowLeft",
+			"ArrowRight",
+			"Home",
+			"End",
+		];
+
+		public isExpandable = false;
+		public isVisible = false;
+		public inGroup = false;
+
+		public constructor(
+			public node: HTMLElement,
+			public tree: Tree,
+			public group: Treeitem | null,
+		) {
+			node.tabIndex = -1;
+			node.setAttribute("role", "treeitem");
+			node.setAttribute("aria-expanded", "false");
+			this.#addEventListeners();
+			this.inGroup = group !== null;
+
+			let el = node.firstElementChild;
+			while (el) {
+				if (el.tagName.toLowerCase() === "ul") {
+					el.setAttribute("role", "group");
+					this.isExpandable = true;
+					break;
+				}
+
+				el = el.nextElementSibling;
+			}
+		}
+
+		public get isExpanded() {
+			if (!this.isExpandable) {
+				return false;
+			}
+			return this.node.getAttribute("aria-expanded") === "true";
+		}
+
+		public handleDisconnect() {
+			this.#removeEventListeners();
+		}
+
+		#addEventListeners() {
+			this.node.addEventListener("click", this.#handleClick.bind(this));
+			this.node.addEventListener(
+				"keydown",
+				this.#handleKeydown.bind(this),
+			);
+		}
+
+		#removeEventListeners() {
+			this.node.removeEventListener(
+				"click",
+				this.#handleClick.bind(this),
+			);
+			this.node.removeEventListener(
+				"keydown",
+				this.#handleKeydown.bind(this),
+			);
+		}
+
+		#handleClick(event: MouseEvent) {
+			if (this.isExpandable) {
+				if (this.isExpanded) {
+					this.tree.collapseItem(this);
+				} else {
+					this.tree.expandItem(this);
+				}
+
+				event.stopPropagation();
+			} else {
+				this.node.querySelector("a")?.click();
+			}
+		}
+
+		#handleKeydown(event: KeyboardEvent) {
+			if (
+				!Treeitem.#handledKeys.includes(event.key) ||
+				event.altKey ||
+				event.ctrlKey ||
+				event.metaKey
+			) {
+				return;
+			}
+
+			event.preventDefault();
+			event.stopPropagation();
+
+			switch (event.key) {
+				case " ":
+				case "Enter":
+					if (this.isExpandable) {
+						this.tree.expandItem(this);
+					} else {
+						this.node.querySelector("a")?.click();
+					}
+					break;
+
+				case "ArrowUp":
+					this.tree.focusPreviousItem(this);
+					break;
+
+				case "ArrowDown":
+					this.tree.focusNextItem(this);
+					break;
+
+				case "ArrowRight":
+					if (this.isExpandable) {
+						if (this.isExpanded) {
+							this.tree.focusNextItem(this);
+						} else {
+							this.tree.expandItem(this);
+						}
+					}
+					break;
+
+				case "ArrowLeft":
+					if (this.isExpandable && this.isExpanded) {
+						this.tree.collapseItem(this);
+					} else if (this.inGroup) {
+						this.tree.focusParentItem(this);
+					}
+					break;
+
+				case "Home":
+					this.tree.focusFirstItem();
+					break;
+
+				case "End":
+					this.tree.focusLastItem();
+					break;
+			}
+		}
+	}
+
+	class Tree extends HTMLUListElement {
+		#treeitems: Array<Treeitem> = [];
+		#firstTreeitem: Treeitem | null = null;
+		#lastTreeitem: Treeitem | null = null;
+
+		public connectedCallback(): void {
+			this.setAttribute("role", "tree");
+
+			this.#findTreeitems(this, this, null);
+			this.#updateVisibleItems();
+			if (this.#firstTreeitem) {
+				this.#firstTreeitem.node.tabIndex = 0;
+			}
+		}
+
+		public disconnectedCallback(): void {
+			for (let i = 0; i < this.#treeitems.length; i++) {
+				const item = this.#treeitems[i];
+				if (!item) {
+					continue;
+				}
+
+				item.handleDisconnect();
+			}
+		}
+
+		public collapseItem(treeitem: Treeitem): void {
+			let groupItem: Treeitem | null = null;
+			if (treeitem.isExpanded) {
+				groupItem = treeitem;
+			} else {
+				groupItem = treeitem.group;
+			}
+
+			if (!groupItem) {
+				return;
+			}
+
+			groupItem.node.setAttribute("aria-expanded", "false");
+			this.#updateVisibleItems();
+			this.focusItem(groupItem);
+		}
+
+		public expandItem(treeitem: Treeitem): void {
+			if (!treeitem.isExpandable) {
+				return;
+			}
+
+			treeitem.node.setAttribute("aria-expanded", "true");
+			this.#updateVisibleItems();
+		}
+
+		public focusItem(treeitem: Treeitem): void {
+			for (let i = 0; i < this.#treeitems.length; i++) {
+				const item = this.#treeitems[i];
+				if (!item) {
+					continue;
+				}
+
+				if (item === treeitem) {
+					item.node.tabIndex = 0;
+					item.node.focus();
+				} else {
+					item.node.tabIndex = -1;
+				}
+			}
+		}
+
+		public focusFirstItem(): void {
+			if (this.#firstTreeitem) {
+				this.focusItem(this.#firstTreeitem);
+			}
+		}
+
+		public focusLastItem(): void {
+			if (this.#lastTreeitem) {
+				this.focusItem(this.#lastTreeitem);
+			}
+		}
+
+		public focusNextItem(treeitem: Treeitem): void {
+			let nextItem: Treeitem | null = null;
+
+			for (let i = this.#treeitems.length - 1; i >= 0; i--) {
+				const item = this.#treeitems[i];
+				if (!item) {
+					continue;
+				}
+
+				if (item === treeitem) {
+					break;
+				}
+
+				if (item.isVisible) {
+					nextItem = item;
+				}
+			}
+
+			if (nextItem) {
+				this.focusItem(nextItem);
+			}
+		}
+
+		public focusParentItem(treeitem: Treeitem): void {
+			if (treeitem.group) {
+				this.focusItem(treeitem.group);
+			}
+		}
+
+		public focusPreviousItem(treeitem: Treeitem): void {
+			let previousItem: Treeitem | null = null;
+
+			for (let i = 0; i < this.#treeitems.length; i++) {
+				const item = this.#treeitems[i];
+				if (!item) {
+					continue;
+				}
+
+				if (item === treeitem) {
+					break;
+				}
+
+				if (item.isVisible) {
+					previousItem = item;
+				}
+			}
+
+			if (previousItem) {
+				this.focusItem(previousItem);
+			}
+		}
+
+		#findTreeitems(
+			node: HTMLElement,
+			tree: Tree,
+			group: Treeitem | null,
+		): void {
+			let el = node.firstElementChild as HTMLElement | null;
+			let treeitem = group;
+
+			while (el) {
+				if (el.tagName.toLowerCase() === "li") {
+					treeitem = new Treeitem(el, tree, group);
+					this.#treeitems.push(treeitem);
+				}
+
+				if (el.firstElementChild) {
+					this.#findTreeitems(el, tree, treeitem);
+				}
+
+				el = el.nextElementSibling as HTMLElement | null;
+			}
+		}
+
+		#updateVisibleItems(): void {
+			this.#firstTreeitem = this.#treeitems[0] ?? null;
+
+			for (let i = 0; i < this.#treeitems.length; i++) {
+				const treeitem = this.#treeitems[i];
+				if (!treeitem) {
+					continue;
+				}
+				treeitem.isVisible = true;
+
+				let parent = treeitem.node.parentElement;
+				while (parent && parent !== this) {
+					if (parent.getAttribute("aria-expanded") === "false") {
+						treeitem.isVisible = false;
+					}
+					parent = parent.parentElement;
+				}
+
+				if (treeitem.isVisible) {
+					this.#lastTreeitem = treeitem;
+				}
+			}
+		}
+	}
+
+	window.customElements.define("pg-tree", Tree, { extends: "ul" });
+</script>
+
+<style>
+	ul[role="group"] {
+		list-style: none;
+		margin: 0;
+		padding: 0 0 0 1rem;
+	}
+	li[role="treeitem"] {
+		list-style-type: none;
+		cursor: pointer;
+		outline: none;
+	}
+	li[role="treeitem"] > [data-group-trigger],
+	li[role="treeitem"] a {
+		display: flex;
+		align-items: center;
+		column-gap: 0.5rem;
+		border-radius: 0.375rem;
+		padding: 0.375rem 0rem;
+	}
+	li[role="treeitem"]:focus-visible > [data-group-trigger],
+	li[role="treeitem"]:focus-visible > a {
+		outline: 2px solid var(--pg-primary-a8);
+		outline-offset: -1px;
+	}
+	li[role="treeitem"] > [data-group-trigger] {
+		background-color: transparent;
+		color: var(--pg-gray-11);
+	}
+	li[role="treeitem"] a {
+		color: var(--pg-primary-11);
+		text-decoration: none;
+		line-height: 1rem;
+	}
+	li[aria-expanded="false"] li[role="treeitem"] {
+		display: none;
+	}
+	li[aria-expanded="false"] > [data-group-trigger] > svg {
+		transform: rotate(0);
+	}
+	li[aria-expanded="true"] > [data-group-trigger] > svg {
+		transform: rotate(90deg);
+	}
+</style>
