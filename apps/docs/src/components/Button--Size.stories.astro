@@ -1,0 +1,88 @@
+---
+import PButton, { type ButtonSize, type ButtonVariant } from "./Button.astro";
+
+const sizes: Array<{ label: string; value: ButtonSize }> = [
+	{
+		label: "Size 1",
+		value: "1",
+	},
+	{
+		label: "Size 2",
+		value: "2",
+	},
+	{
+		label: "Size 3",
+		value: "3",
+	},
+	{
+		label: "Size 4",
+		value: "4",
+	},
+];
+const variants: Array<{ label: string; value: ButtonVariant }> = [
+	{
+		label: "Solid",
+		value: "solid",
+	},
+	{
+		label: "Soft",
+		value: "soft",
+	},
+	{
+		label: "Surface",
+		value: "surface",
+	},
+	{
+		label: "Outline",
+		value: "outline",
+	},
+	{
+		label: "Ghost",
+		value: "ghost",
+	},
+];
+---
+
+<table
+	class="[&_th]:text-grayA-11 [&_td:first-child]:text-grayA-11 border-collapse [&_td:first-child]:min-w-[4rem] [&_td:first-child]:text-xs [&_td]:pb-4 [&_td]:pr-4 [&_td]:text-center [&_th]:pb-4 [&_th]:pr-4 [&_th]:text-center [&_th]:text-xs"
+>
+	<thead>
+		<tr>
+			<th></th>
+			{sizes.map((size) => <th>{size.label}</th>)}
+		</tr>
+	</thead>
+	<tbody>
+		{
+			variants.map((variant) => (
+				<tr>
+					<td>{variant.label}</td>
+					{sizes.map((size) => (
+						<td>
+							<PButton
+								color="primary"
+								size={size.value}
+								variant={variant.value}
+							>
+								Next
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								>
+									<path d="M18 8L22 12L18 16" />
+									<path d="M2 12H22" />
+								</svg>
+							</PButton>
+						</td>
+					))}
+				</tr>
+			))
+		}
+	</tbody>
+</table>

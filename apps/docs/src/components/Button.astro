@@ -1,0 +1,189 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { cva, type VariantProps } from "~/classnames";
+
+const button = cva({
+	base: [
+		"cursor-default",
+		"inline-flex",
+		"items-center",
+		"justify-center",
+		"shrink-0",
+		"select-none",
+		"align-top",
+		"outline-none",
+		"focus-visible:outline-2",
+		"focus-visible:outline-primaryA-8",
+		"disabled:cursor-not-allowed",
+		"disabled:text-grayA-8",
+	],
+	variants: {
+		color: {
+			primary: [
+				"[--button-color-a2:theme('colors.primaryA.2')]",
+				"[--button-color-a3:theme('colors.primaryA.3')]",
+				"[--button-color-a4:theme('colors.primaryA.4')]",
+				"[--button-color-a5:theme('colors.primaryA.5')]",
+				"[--button-color-a7:theme('colors.primaryA.7')]",
+				"[--button-color-a8:theme('colors.primaryA.8')]",
+				"[--button-color-a11:theme('colors.primaryA.11')]",
+				"[--button-color-9:theme('colors.primary.9')]",
+				"[--button-color-10:theme('colors.primary.10')]",
+				"[--button-color-contrast:theme('colors.primary-contrast')]",
+				"[--button-color-surface:theme('colors.primary-surface')]",
+			],
+			warning: [
+				"[--button-color-a2:theme('colors.warningA.2')]",
+				"[--button-color-a3:theme('colors.warningA.3')]",
+				"[--button-color-a4:theme('colors.warningA.4')]",
+				"[--button-color-a5:theme('colors.warningA.5')]",
+				"[--button-color-a7:theme('colors.warningA.7')]",
+				"[--button-color-a8:theme('colors.warningA.8')]",
+				"[--button-color-a11:theme('colors.warningA.11')]",
+				"[--button-color-9:theme('colors.warning.9')]",
+				"[--button-color-10:theme('colors.warning.10')]",
+				"[--button-color-contrast:theme('colors.warning-contrast')]",
+				"[--button-color-surface:theme('colors.warning-surface')]",
+			],
+			danger: [
+				"[--button-color-a2:theme('colors.dangerA.2')]",
+				"[--button-color-a3:theme('colors.dangerA.3')]",
+				"[--button-color-a4:theme('colors.dangerA.4')]",
+				"[--button-color-a5:theme('colors.dangerA.5')]",
+				"[--button-color-a7:theme('colors.dangerA.7')]",
+				"[--button-color-a8:theme('colors.dangerA.8')]",
+				"[--button-color-a11:theme('colors.dangerA.11')]",
+				"[--button-color-9:theme('colors.danger.9')]",
+				"[--button-color-10:theme('colors.danger.10')]",
+				"[--button-color-contrast:theme('colors.danger-contrast')]",
+				"[--button-color-surface:theme('colors.danger-surface')]",
+			],
+			gray: [
+				"[--button-color-a2:theme('colors.grayA.2')]",
+				"[--button-color-a3:theme('colors.grayA.3')]",
+				"[--button-color-a4:theme('colors.grayA.4')]",
+				"[--button-color-a5:theme('colors.grayA.5')]",
+				"[--button-color-a7:theme('colors.grayA.7')]",
+				"[--button-color-a8:theme('colors.grayA.8')]",
+				"[--button-color-a11:theme('colors.grayA.11')]",
+				"[--button-color-9:theme('colors.gray.9')]",
+				"[--button-color-10:theme('colors.gray.10')]",
+				"[--button-color-contrast:theme('colors.gray-contrast')]",
+				"[--button-color-surface:theme('colors.gray-surface')]",
+			],
+		},
+		size: {
+			"1": ["h-6", "rounded-[3px]", "gap-x-1", "text-xs"],
+			"2": ["h-8", "rounded", "gap-x-2", "text-sm"],
+			"3": ["h-10", "rounded-md", "gap-x-3", "text-base"],
+			"4": ["h-12", "rounded-lg", "gap-x-3", "text-lg"],
+		},
+		variant: {
+			solid: [
+				"bg-[var(--button-color-9)]",
+				"text-[var(--button-color-contrast)]",
+				"hover:bg-[var(--button-color-10)]",
+				"active:bg-[var(--button-color-10)]",
+				"active:brightness-[1.08]",
+				"focus-visible:outline-offset-2",
+				"disabled:bg-grayA-3",
+				"disabled:brightness-1",
+			],
+			soft: [
+				"bg-[var(--button-color-a3)]",
+				"hover:bg-[var(--button-color-a4)]",
+				"active:bg-[var(--button-color-a5)]",
+				"disabled:bg-grayA-3",
+			],
+			surface: [
+				"bg-[var(--button-color-surface)]",
+				"ring-[var(--button-color-a7)]",
+				"hover:ring-[var(--button-color-a8)]",
+				"active:bg-[var(--button-color-a3)]",
+				"active:ring-[var(--button-color-a8)]",
+				"disabled:bg-grayA-2",
+				"disabled:ring-grayA-6",
+			],
+			outline: [
+				"ring-[var(--button-color-a8)]",
+				"hover:bg-[var(--button-color-a2)]",
+				"active:bg-[var(--button-color-a3)]",
+				"disabled:bg-transparent",
+				"disabled:ring-grayA-7",
+			],
+			ghost: [
+				"hover:bg-[var(--button-color-a3)]",
+				"active:bg-[var(--button-color-a4)]",
+				"h-fit",
+				"disabled:bg-transparent",
+			],
+		},
+	},
+	compoundVariants: [
+		{
+			variant: ["solid", "soft", "surface", "outline"],
+			class: "font-medium",
+		},
+		{
+			size: "1",
+			variant: ["solid", "soft", "surface", "outline"],
+			class: "px-2",
+		},
+		{
+			size: "2",
+			variant: ["solid", "soft", "surface", "outline"],
+			class: "px-3",
+		},
+		{
+			size: "3",
+			variant: ["solid", "soft", "surface", "outline"],
+			class: "px-4",
+		},
+		{
+			size: "4",
+			variant: ["solid", "soft", "surface", "outline"],
+			class: "px-6",
+		},
+		{
+			size: ["1", "2"],
+			variant: "ghost",
+			class: "gap-x-1 px-2 py-1",
+		},
+		{
+			size: "3",
+			variant: "ghost",
+			class: "gap-x-2 px-3 py-1.5",
+		},
+		{
+			size: "4",
+			variant: "ghost",
+			class: "gap-x-2 px-4 py-2",
+		},
+		{
+			variant: ["surface", "outline"],
+			class: "ring-1 ring-inset",
+		},
+		{
+			variant: ["soft", "surface", "outline", "ghost"],
+			class: "text-[var(--button-color-a11)]",
+		},
+	],
+	defaultVariants: {
+		size: "2",
+	},
+});
+
+type ButtonVariantProps = VariantProps<typeof button>;
+export type ButtonColor = NonNullable<ButtonVariantProps["color"]>;
+export type ButtonSize = NonNullable<ButtonVariantProps["size"]>;
+export type ButtonVariant = NonNullable<ButtonVariantProps["variant"]>;
+export type Props = HTMLAttributes<"button"> &
+	Required<Omit<ButtonVariantProps, "size">> &
+	Pick<ButtonVariantProps, "size">;
+
+const { class: className, color, size, variant, ...props } = Astro.props;
+---
+
+<button {...props} class={button({ className, color, size, variant })}>
+	<slot />
+</button>
