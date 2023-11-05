@@ -35,8 +35,8 @@
 			"import": "./dist/index.js",
 			"types": "./dist/index.d.ts"
 		},
-		"./index.astro": "./dist/index.astro",
-		"./story.astro": "./dist/story.astro",
+		"./index.astro": "./dist/index.generated.astro",
+		"./story.astro": "./dist/story.generated.astro",
 		"./components": {
 			"import": "./dist/components.ts",
 			"types": "./dist/components.ts"

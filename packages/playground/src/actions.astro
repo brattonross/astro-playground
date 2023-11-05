@@ -1,10 +1,22 @@
 ---
-export type Props = {
-	/** The filepath of the current story. */
-	filepath?: string;
-	/** The source of the current story. */
-	source?: string;
-};
+import { promises as fs } from "node:fs";
+
+const startIndex = Astro.url.pathname.indexOf("{{path}}/") + "{{path}}/".length;
+const parts = Astro.url.pathname.slice(startIndex).split("/");
+const filename = parts.join("--");
+
+let filepath: string | undefined = undefined;
+let source: string | undefined = undefined;
+
+const storyModules = await Astro.glob("{{stories}}");
+const storyMod = storyModules.find((file) =>
+	file.file.toLowerCase().includes(filename),
+);
+
+if (storyMod) {
+	filepath = storyMod.file.slice(storyMod.file.indexOf("/src/") + 1);
+	source = await fs.readFile(storyMod.file, "utf8");
+}
 ---
 
 <header role="banner">
@@ -56,7 +68,7 @@ export type Props = {
 			<button
 				is="pg-show-source-button"
 				aria-label="Toggle show source."
-				disabled={typeof Astro.props.source !== "string"}
+				disabled={!source}
 				title="Toggle show source."
 				role="button"
 				type="button"
@@ -81,7 +93,7 @@ export type Props = {
 </header>
 
 {
-	typeof Astro.props.filepath !== "undefined" ? (
+	filepath ? (
 		<dialog id="__playground-source-dialog">
 			<button
 				type="button"
@@ -105,15 +117,10 @@ export type Props = {
 				</svg>
 			</button>
 			<p>
-				Source for{" "}
-				<code>
-					{Astro.props.filepath.slice(
-						Astro.props.filepath.indexOf("/src/") + 1,
-					)}
-				</code>
+				Source for <code>{filepath}</code>
 			</p>
-			<pre>
-				<code>{Astro.props.source}</code>
+			<pre style="white-space-collapse: collapse">
+				<code style="white-space-collapse: preserve">{source}</code>
 			</pre>
 		</dialog>
 	) : null

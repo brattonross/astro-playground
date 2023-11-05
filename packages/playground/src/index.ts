@@ -35,18 +35,23 @@ export function playground(
 				logger.debug(`Writing playground files to: ${outDir}`);
 				await Promise.all([
 					fs.writeFile(
-						path.join(outDir, "story-tree.astro"),
-						await generateStoryTree(options),
+						path.join(outDir, "actions.generated.astro"),
+						await generateFile("actions.astro", options),
 						"utf-8",
 					),
 					fs.writeFile(
-						path.join(outDir, "index.astro"),
-						await generateIndexPage(options),
+						path.join(outDir, "story-tree.generated.astro"),
+						await generateFile("story-tree.astro", options),
 						"utf-8",
 					),
 					fs.writeFile(
-						path.join(outDir, "story.astro"),
-						await generateStoryPage(options),
+						path.join(outDir, "index.generated.astro"),
+						await generateFile("index.astro", options),
+						"utf-8",
+					),
+					fs.writeFile(
+						path.join(outDir, "story.generated.astro"),
+						await generateFile("story.astro", options),
 						"utf-8",
 					),
 				]);
@@ -82,27 +87,15 @@ function resolveOptions(options: UserPlaygroundOptions): PlaygroundOptions {
 	};
 }
 
-async function generateStoryTree(options: PlaygroundOptions): Promise<string> {
-	let src = await fs.readFile(path.join(outDir, "story-tree.astro"), "utf-8");
+async function generateFile(
+	input: string,
+	options: PlaygroundOptions,
+): Promise<string> {
+	let src = await fs.readFile(path.join(outDir, input), "utf-8");
 	return src
-		.replace("{{stories}}", options.stories)
-		.replace("{{path}}", options.path);
-}
-
-async function generateIndexPage(options: PlaygroundOptions): Promise<string> {
-	let src = await fs.readFile(path.join(outDir, "index.astro"), "utf-8");
-	return src
-		.replace("{{layout}}", options.layout)
-		.replace("{{stories}}", options.stories)
-		.replace("{{path}}", options.path);
-}
-
-async function generateStoryPage(options: PlaygroundOptions) {
-	let src = await fs.readFile(path.join(outDir, "story.astro"), "utf-8");
-	return src
-		.replace("{{layout}}", options.layout)
-		.replace("{{stories}}", options.stories)
-		.replace("{{path}}", options.path);
+		.replaceAll("{{layout}}", options.layout)
+		.replaceAll("{{stories}}", options.stories)
+		.replaceAll("{{path}}", options.path);
 }
 
 export default playground;

@@ -1,4 +1,3 @@
-import type { AstroGlobal } from "astro";
 import path from "node:path";
 
 export type Story = {
