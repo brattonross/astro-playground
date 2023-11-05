@@ -493,6 +493,9 @@ body {
 	height: 100svh;
 	overflow: hidden;
 }
+button {
+	cursor: default;
+}
 #__playground > main {
 	flex: 1 1 auto;
 	overflow-y: auto;
@@ -585,13 +588,14 @@ dialog {
 	max-width: 100%;
 	height: min(100%, 600px);
 	max-height: 100%;
+	padding: 0.5rem;
 }
 dialog button {
 	position: absolute;
 	top: 0.25rem;
 	right: 0.25rem;
-	width: 25px;
-	height: 25px;
+	width: 24px;
+	height: 24px;
 	background-color: transparent;
 	border: none;
 	color: var(--pg-gray-11);
@@ -627,6 +631,10 @@ dialog p code {
 }
 dialog pre {
 	overflow: auto;
+}
+dialog pre,
+dialog code {
+	margin: 0;
 }
 </style>`;
 }
