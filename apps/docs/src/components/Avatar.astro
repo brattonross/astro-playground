@@ -1,0 +1,104 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { cva, type VariantProps } from "~/classnames";
+
+const avatar = cva({
+	base: [
+		"inline-flex",
+		"items-center",
+		"justify-center",
+		"align-middle",
+		"select-none",
+		"w-10",
+		"h-10",
+		"rounded-md",
+		"shrink-0",
+	],
+	variants: {
+		color: {
+			primary: [],
+			gray: [],
+		},
+		variant: {
+			solid: [],
+			soft: [],
+		},
+	},
+});
+
+const fallbackContent = await Astro.slots
+	.render("default")
+	.then((s) => s.trim());
+
+const fallback = cva({
+	base: [
+		"w-full",
+		"h-full",
+		"z-0",
+		"flex",
+		"items-center",
+		"justify-center",
+		"leading-[1]",
+		"font-medium",
+		"uppercase",
+		"rounded-[inherit]",
+		{
+			"text-lg": fallbackContent.length < 2,
+			"text-base": fallbackContent.length >= 2,
+		},
+	],
+	variants: {
+		color: {
+			primary: [],
+			gray: [],
+		},
+		variant: {
+			solid: [],
+			soft: [],
+		},
+	},
+	compoundVariants: [
+		{
+			color: "primary",
+			variant: "solid",
+			class: ["bg-primary-9", "text-primary-contrast"],
+		},
+		{
+			color: "primary",
+			variant: "soft",
+			class: ["bg-primaryA-3", "text-primaryA-11"],
+		},
+		{
+			color: "gray",
+			variant: "solid",
+			class: ["bg-gray-9", "text-gray-contrast"],
+		},
+		{
+			color: "gray",
+			variant: "soft",
+			class: ["bg-grayA-3", "text-grayA-11"],
+		},
+	],
+});
+
+type AvatarVariantProps = VariantProps<typeof avatar>;
+export type AvatarColor = NonNullable<AvatarVariantProps["color"]>;
+export type AvatarVariant = NonNullable<AvatarVariantProps["variant"]>;
+export type Props = HTMLAttributes<"div"> &
+	Required<AvatarVariantProps> & {
+		src?: string;
+	};
+const { class: className, color, variant, ...props } = Astro.props;
+---
+
+<div {...props} class={avatar({ className, color, variant })}>
+	<img
+		class="h-full w-full rounded-[inherit] object-cover"
+		hidden
+		src={Astro.props.src}
+		onload="this.hidden = false"
+	/>
+	<span class={fallback({ color, variant })}>
+		{!Astro.props.src ? <slot /> : null}
+	</span>
+</div>

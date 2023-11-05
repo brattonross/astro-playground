@@ -1,0 +1,93 @@
+---
+import PAvatar, { type AvatarColor, type AvatarVariant } from "./Avatar.astro";
+
+const colors: Array<{ label: string; value: AvatarColor }> = [
+	{
+		label: "Primary",
+		value: "primary",
+	},
+	{
+		label: "Gray",
+		value: "gray",
+	},
+];
+const variants: Array<{ label: string; value: AvatarVariant }> = [
+	{
+		label: "Solid",
+		value: "solid",
+	},
+	{
+		label: "Soft",
+		value: "soft",
+	},
+];
+---
+
+<table
+	class="[&_th]:text-grayA-11 [&_td:first-child]:text-grayA-11 border-collapse [&_td:first-child]:min-w-[4rem] [&_td:first-child]:text-xs [&_td]:pb-4 [&_td]:pr-4 [&_th]:pb-4 [&_th]:pr-4 [&_th]:text-center [&_th]:text-xs"
+>
+	<thead>
+		<tr>
+			<th></th>
+			{colors.map((color) => <th colspan="4">{color.label}</th>)}
+		</tr>
+	</thead>
+	<tbody>
+		{
+			variants.map((variant) => (
+				<tr>
+					<td>{variant.label}</td>
+					{colors.map((color) => (
+						<>
+							<td>
+								<PAvatar
+									color={color.value}
+									src="https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?&w=256&h=256&q=70&crop=focalpoint&fp-x=0.5&fp-y=0.3&fp-z=1&fit=crop"
+									variant={variant.value}
+								>
+									A
+								</PAvatar>
+							</td>
+							<td>
+								<PAvatar
+									color={color.value}
+									variant={variant.value}
+								>
+									A
+								</PAvatar>
+							</td>
+							<td>
+								<PAvatar
+									color={color.value}
+									variant={variant.value}
+								>
+									TJ
+								</PAvatar>
+							</td>
+							<td>
+								<PAvatar
+									color={color.value}
+									variant={variant.value}
+								>
+									<svg
+										width="24"
+										height="24"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+									>
+										<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+										<circle cx="12" cy="7" r="4" />
+									</svg>
+								</PAvatar>
+							</td>
+						</>
+					))}
+				</tr>
+			))
+		}
+	</tbody>
+</table>
