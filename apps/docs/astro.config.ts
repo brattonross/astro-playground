@@ -7,6 +7,8 @@ export default defineConfig({
 		tailwind({
 			applyBaseStyles: false,
 		}),
-		playground(),
+		playground({
+			layout: "~/components/Layout.astro",
+		}),
 	],
 });

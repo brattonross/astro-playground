@@ -7,6 +7,11 @@ const outDir = path.dirname(new URL(import.meta.url).pathname);
 
 export type UserPlaygroundOptions = {
 	/**
+	 * The path to the layout component to use.
+	 * Useful if you want to inject custom styles or scripts.
+	 */
+	layout?: string;
+	/**
 	 * The base path of the playground.
 	 * @default "/playground"
 	 */
@@ -66,6 +71,7 @@ function resolveOptions(options: UserPlaygroundOptions): PlaygroundOptions {
 	basePath = basePath.endsWith("/") ? basePath.slice(0, -1) : basePath;
 
 	return {
+		layout: options.layout ?? "",
 		path: options.path ?? "/playground",
 		stories: options.stories ?? "/src/**/*.stories.astro",
 	};
@@ -75,6 +81,11 @@ function generateIndexPage(options: PlaygroundOptions) {
 	return `---
 import path from "node:path";
 import TreeItem from "./tree-item.astro";
+
+let Layout = null;
+if ("${options.layout}") {
+	Layout = (await import("${options.layout}")).default;
+}
 
 function kebabCase(str) {
 	return str.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
@@ -122,6 +133,11 @@ function generateStoryPage(options: PlaygroundOptions) {
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import TreeItem from "./tree-item.astro";
+
+let Layout = null;
+if ("${options.layout}") {
+	Layout = (await import("${options.layout}")).default;
+}
 
 export async function getStaticPaths() {
 	function kebabCase(str) {
@@ -219,7 +235,7 @@ function baseHTML(children: string) {
 <body>
 	<div id="__playground">
 		<main>
-			${children}
+			{Layout ? <Layout>${children}</Layout> : ${children}}
 		</main>
 		<aside>
 			<nav>

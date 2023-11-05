@@ -9,6 +9,10 @@
 		"dev": "astro dev",
 		"preview": "astro preview"
 	},
+	"dependencies": {
+		"cva": "1.0.0-beta.1",
+		"tailwind-merge": "^2.0.0"
+	},
 	"devDependencies": {
 		"@astrojs/tailwind": "^5.0.2",
 		"@brattonross/astro-playground": "workspace:*",

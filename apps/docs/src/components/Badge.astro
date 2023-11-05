@@ -1,1 +1,44 @@
-<div>Badge</div>
+---
+import type { HTMLAttributes } from "astro/types";
+import { cva, type VariantProps } from "~/classnames";
+
+const badge = cva({
+	base: [
+		"inline-flex",
+		"items-center",
+		"whitespace-nowrap",
+		"font-medium",
+		"shrink-0",
+		"select-none",
+		"cursor-default",
+		"text-xs",
+		"px-2",
+		"py-0.5",
+		"rounded",
+	],
+	variants: {
+		color: {
+			primary: [],
+		},
+		variant: {
+			solid: [],
+		},
+	},
+	compoundVariants: [
+		{
+			color: "primary",
+			variant: "solid",
+			class: ["bg-primary-9", "text-white"],
+		},
+	],
+});
+
+type BadgeVariantProps = VariantProps<typeof badge>;
+export type Props = HTMLAttributes<"div"> & Required<BadgeVariantProps>;
+
+const { class: className, color, variant, ...props } = Astro.props;
+---
+
+<div {...props} class={badge({ className, color, variant })}>
+	<slot />
+</div>

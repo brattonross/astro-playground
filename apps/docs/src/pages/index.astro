@@ -1,5 +1,75 @@
 ---
-
+import "~/main.css";
 ---
 
-asdf
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link
+			rel="preload"
+			href="/fonts/Geist-Regular.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin
+		/>
+		<link
+			rel="preload"
+			href="/fonts/Geist-Medium.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin
+		/>
+	</head>
+	<body
+		class="bg-app-background text-gray-12 font-sans text-base antialiased"
+	>
+		<div class="mx-auto w-full max-w-7xl px-4 pt-16 md:px-6 lg:px-8">
+			<h1 class="text-4xl font-medium">Astro Playground</h1>
+			<p class="text-gray-11 mt-3 text-lg">
+				An Astro integration that adds a component playground to your
+				project.
+			</p>
+			<div class="mt-8 flex items-center gap-x-2">
+				<a
+					class="bg-iris-9 hover:bg-iris-10 active:bg-iris-10 focus-visible:outline-irisA-8 flex h-10 items-center justify-center gap-x-2 rounded border-none px-3 font-medium text-white outline-none focus-visible:outline-2 focus-visible:outline-offset-2 active:brightness-[1.08]"
+					href="/playground"
+					>Demo
+					<svg
+						width="20"
+						height="20"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						><path d="M18 8L22 12L18 16"></path><path d="M2 12H22"
+						></path></svg
+					></a
+				>
+				<a
+					class="text-grayA-11 hover:bg-grayA-4 active:bg-grayA-5 focus-visible:outline-grayA-8 flex h-10 items-center justify-center gap-x-2 rounded bg-transparent px-3 font-medium outline-none focus-visible:outline-2 focus-visible:outline-offset-2"
+					href="https://github.com/brattonross/astro-playground"
+					>GitHub
+					<svg
+						width="20"
+						height="20"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						><path
+							d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+						></path><polyline points="15 3 21 3 21 9"
+						></polyline><line x1="10" x2="21" y1="14" y2="3"
+						></line></svg
+					>
+				</a>
+			</div>
+		</div>
+	</body>
+</html>

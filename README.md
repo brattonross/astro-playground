@@ -38,6 +38,36 @@ Components
     └── Primary
 ```
 
+## Layout
+
+If you want to add some custom styles and scripts to the playground, the `layout` option can be provided with a path to the component you want to use as the layout. Remember to use a `<slot>` to render the story content!
+
+```js
+// astro.config.mjs
+import { defineConfig } from "astro/config";
+import playground from "@brattonross/astro-playground";
+
+export default defineConfig({
+	// ...
+	integrations: [
+		playground({
+			layout: "~/components/PlaygroundLayout.astro",
+		}),
+	],
+	// ...
+});
+```
+
+A basic layout might look like:
+
+```astro
+---
+import "~/styles.css";
+---
+
+<slot />
+```
+
 ## TODO
 
 Things I'd like this integration to do:
