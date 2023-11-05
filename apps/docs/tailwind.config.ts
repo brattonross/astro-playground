@@ -11,8 +11,39 @@ export default {
 			colors: {
 				gray: colors.alias("slate"),
 				grayA: colors.alias("slateA"),
+				"gray-surface": colors.alias({
+					light: "#ffffffcc",
+					dark: "#1f212380",
+				}),
+				"gray-contrast": "#fff",
 				primary: colors.alias("iris"),
 				primaryA: colors.alias("irisA"),
+				"primary-surface": colors.alias({
+					light: "#f6f6ffcc",
+					dark: "#1d1b3980",
+				}),
+				"primary-contrast": "#fff",
+				success: colors.alias("grass"),
+				successA: colors.alias("grassA"),
+				"success-surface": colors.alias({
+					light: "#f3faf3cc",
+					dark: "#19231b80",
+				}),
+				"success-contrast": "#fff",
+				warning: colors.alias("amber"),
+				warningA: colors.alias("amberA"),
+				"warning-surface": colors.alias({
+					light: "#fefae4cc",
+					dark: "#271f1380",
+				}),
+				"warning-contrast": "#21201c",
+				danger: colors.alias("tomato"),
+				dangerA: colors.alias("tomatoA"),
+				"danger-surface": colors.alias({
+					light: "#fff6f5cc",
+					dark: "#2d191580",
+				}),
+				"danger-contrast": "#fff",
 				"app-background": colors.alias({
 					light: "white",
 					dark: "gray.1",

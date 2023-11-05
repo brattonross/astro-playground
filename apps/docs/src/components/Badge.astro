@@ -19,21 +19,175 @@ const badge = cva({
 	variants: {
 		color: {
 			primary: [],
+			success: [],
+			warning: [],
+			danger: [],
+			gray: [],
 		},
 		variant: {
 			solid: [],
+			soft: [],
+			surface: [],
+			outline: [],
 		},
 	},
 	compoundVariants: [
 		{
 			color: "primary",
 			variant: "solid",
-			class: ["bg-primary-9", "text-white"],
+			class: ["bg-primary-9", "text-primary-contrast"],
+		},
+		{
+			color: "primary",
+			variant: "soft",
+			class: ["bg-primaryA-3", "text-primaryA-11"],
+		},
+		{
+			color: "primary",
+			variant: "surface",
+			class: [
+				"bg-primary-surface",
+				"ring-1",
+				"ring-inset",
+				"ring-primaryA-7",
+				"text-primaryA-11",
+			],
+		},
+		{
+			color: "primary",
+			variant: "outline",
+			class: [
+				"ring-1",
+				"ring-inset",
+				"ring-primaryA-8",
+				"text-primaryA-11",
+			],
+		},
+		{
+			color: "success",
+			variant: "solid",
+			class: ["bg-success-9", "text-success-contrast"],
+		},
+		{
+			color: "success",
+			variant: "soft",
+			class: ["bg-successA-3", "text-successA-11"],
+		},
+		{
+			color: "success",
+			variant: "surface",
+			class: [
+				"bg-success-surface",
+				"ring-1",
+				"ring-inset",
+				"ring-successA-7",
+				"text-successA-11",
+			],
+		},
+		{
+			color: "success",
+			variant: "outline",
+			class: [
+				"ring-1",
+				"ring-inset",
+				"ring-successA-8",
+				"text-successA-11",
+			],
+		},
+		{
+			color: "warning",
+			variant: "solid",
+			class: ["bg-warning-9", "text-warning-contrast"],
+		},
+		{
+			color: "warning",
+			variant: "soft",
+			class: ["bg-warningA-3", "text-warningA-11"],
+		},
+		{
+			color: "warning",
+			variant: "surface",
+			class: [
+				"bg-warning-surface",
+				"ring-1",
+				"ring-inset",
+				"ring-warningA-7",
+				"text-warningA-11",
+			],
+		},
+		{
+			color: "warning",
+			variant: "outline",
+			class: [
+				"ring-1",
+				"ring-inset",
+				"ring-warningA-8",
+				"text-warningA-11",
+			],
+		},
+		{
+			color: "danger",
+			variant: "solid",
+			class: ["bg-danger-9", "text-danger-contrast"],
+		},
+		{
+			color: "danger",
+			variant: "soft",
+			class: ["bg-dangerA-3", "text-dangerA-11"],
+		},
+		{
+			color: "danger",
+			variant: "surface",
+			class: [
+				"bg-danger-surface",
+				"ring-1",
+				"ring-inset",
+				"ring-dangerA-7",
+				"text-dangerA-11",
+			],
+		},
+		{
+			color: "danger",
+			variant: "outline",
+			class: [
+				"ring-1",
+				"ring-inset",
+				"ring-dangerA-8",
+				"text-dangerA-11",
+			],
+		},
+		{
+			color: "gray",
+			variant: "solid",
+			class: ["bg-gray-9", "text-gray-contrast"],
+		},
+		{
+			color: "gray",
+			variant: "soft",
+			class: ["bg-grayA-3", "text-grayA-11"],
+		},
+		{
+			color: "gray",
+			variant: "surface",
+			class: [
+				"bg-gray-surface",
+				"ring-1",
+				"ring-inset",
+				"ring-grayA-7",
+				"text-grayA-11",
+			],
+		},
+		{
+			color: "gray",
+			variant: "outline",
+			class: ["ring-1", "ring-inset", "ring-grayA-8", "text-grayA-11"],
 		},
 	],
 });
 
 type BadgeVariantProps = VariantProps<typeof badge>;
+export type BadgeColor = NonNullable<BadgeVariantProps["color"]>;
+export type BadgeVariant = NonNullable<BadgeVariantProps["variant"]>;
 export type Props = HTMLAttributes<"div"> & Required<BadgeVariantProps>;
 
 const { class: className, color, variant, ...props } = Astro.props;

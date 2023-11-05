@@ -1,0 +1,11 @@
+---
+import { parseStories } from "./shared.ts";
+import StoryTreeItem from "./story-tree-item.astro";
+
+const files = await Astro.glob("{{stories}}");
+const stories = parseStories("{{path}}", files);
+---
+
+<ul is="pg-tree" role="tree">
+	{stories.map((story) => <StoryTreeItem story={story} />)}
+</ul>

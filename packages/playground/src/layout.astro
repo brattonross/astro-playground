@@ -1,0 +1,28 @@
+---
+import Actions from "./actions.astro";
+import Main from "./main.astro";
+import Meta from "./meta.astro";
+import Root from "./root.astro";
+import Scripts from "./scripts.astro";
+import Sidebar from "./sidebar.astro";
+import Styles from "./styles.astro";
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<Meta />
+		<Scripts />
+		<Styles />
+		<slot name="head" />
+	</head>
+	<body>
+		<Root>
+			<Main>
+				<slot />
+			</Main>
+			<Sidebar />
+			<Actions />
+		</Root>
+	</body>
+</html>

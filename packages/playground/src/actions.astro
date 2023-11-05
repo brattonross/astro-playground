@@ -1,0 +1,269 @@
+---
+export type Props = {
+	/** The filepath of the current story. */
+	filepath?: string;
+	/** The source of the current story. */
+	source?: string;
+};
+---
+
+<header role="banner">
+	<ul>
+		<li>
+			<button
+				is="pg-dark-mode-button"
+				aria-label="Toggle dark mode."
+				title="Toggle dark mode."
+				role="button"
+				type="button"
+			>
+				<svg
+					aria-hidden="true"
+					width="16"
+					height="16"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="lucide lucide-sun-medium"
+				>
+					<circle cx="12" cy="12" r="4"></circle>
+					<path d="M12 3v1"></path>
+					<path d="M12 20v1"></path>
+					<path d="M3 12h1"></path>
+					<path d="M20 12h1"></path>
+					<path d="m18.364 5.636-.707.707"></path>
+					<path d="m6.343 17.657-.707.707"></path>
+					<path d="m5.636 5.636.707.707"></path>
+					<path d="m17.657 17.657.707.707"></path>
+				</svg>
+			</button>
+		</li>
+		<li>
+			<button
+				is="pg-rtl-button"
+				aria-label="Toggle text direction."
+				title="Toggle text direction."
+				role="button"
+				type="button"
+			>
+				RTL
+			</button>
+		</li>
+		<li>
+			<button
+				is="pg-show-source-button"
+				aria-label="Toggle show source."
+				disabled={typeof Astro.props.source !== "string"}
+				title="Toggle show source."
+				role="button"
+				type="button"
+			>
+				<svg
+					width="16"
+					height="16"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path d="m18 16 4-4-4-4"></path>
+					<path d="m6 8-4 4 4 4"></path>
+					<path d="m14.5 4-5 16"></path>
+				</svg>
+			</button>
+		</li>
+	</ul>
+</header>
+
+{
+	typeof Astro.props.filepath !== "undefined" ? (
+		<dialog id="__playground-source-dialog">
+			<button
+				type="button"
+				aria-label="Close source dialog."
+				title="Close source dialog."
+				onclick="document.getElementById('__playground-source-dialog').close()"
+			>
+				<svg
+					aria-hidden="true"
+					width="16"
+					height="16"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path d="M18 6l-6 6 6 6" />
+					<path d="M6 6l6 6-6 6" />
+				</svg>
+			</button>
+			<p>
+				Source for{" "}
+				<code>
+					{Astro.props.filepath.slice(
+						Astro.props.filepath.indexOf("/src/") + 1,
+					)}
+				</code>
+			</p>
+			<pre>
+				<code>{Astro.props.source}</code>
+			</pre>
+		</dialog>
+	) : null
+}
+
+<script>
+	class ToggleButton extends HTMLButtonElement {
+		public connectedCallback() {
+			this.setAttribute("aria-pressed", "false");
+			this.addEventListener("click", this.#handleClick);
+		}
+
+		public disconnectedCallback() {
+			this.removeEventListener("click", this.#handleClick);
+		}
+
+		#handleClick() {
+			const pressed = this.getAttribute("aria-pressed") === "true";
+			this.setAttribute("aria-pressed", String(!pressed));
+		}
+	}
+
+	class LeftToRightButton extends ToggleButton {
+		#observer = new MutationObserver(this.#handleMutation.bind(this));
+
+		public connectedCallback() {
+			super.connectedCallback();
+			this.setAttribute(
+				"aria-pressed",
+				window.location.search.includes("dir=rtl") ? "true" : "false",
+			);
+			this.#observer.observe(this, { attributes: true });
+		}
+
+		public disconnectedCallback() {
+			super.disconnectedCallback();
+			this.#observer.disconnect();
+		}
+
+		#handleMutation(mutations: Array<MutationRecord>) {
+			for (const mutation of mutations) {
+				if (mutation.attributeName === "aria-pressed") {
+					const pressed =
+						this.getAttribute("aria-pressed") === "true";
+					const url = new URL(window.location.href);
+					if (pressed) {
+						document.documentElement.dir = "rtl";
+						url.searchParams.set("dir", "rtl");
+					} else {
+						document.documentElement.removeAttribute("dir");
+						url.searchParams.delete("dir");
+					}
+					window.history.pushState({}, "", url.toString());
+				}
+			}
+		}
+	}
+
+	class DarkModeButton extends ToggleButton {
+		#observer = new MutationObserver(this.#handleMutation.bind(this));
+
+		public connectedCallback() {
+			super.connectedCallback();
+			let isDark = window.location.search.includes("dark=true");
+			if (!window.location.search.includes("dark=false")) {
+				isDark = window.matchMedia(
+					"(prefers-color-scheme: dark)",
+				).matches;
+			}
+			this.setAttribute("aria-pressed", String(isDark));
+			this.#observer.observe(this, { attributes: true });
+		}
+
+		public disconnectedCallback() {
+			super.disconnectedCallback();
+			this.#observer.disconnect();
+		}
+
+		#handleMutation(mutations: Array<MutationRecord>) {
+			for (const mutation of mutations) {
+				if (mutation.attributeName === "aria-pressed") {
+					const pressed =
+						this.getAttribute("aria-pressed") === "true";
+					const url = new URL(window.location.href);
+					if (pressed) {
+						document.documentElement.dataset.theme = "dark";
+						url.searchParams.set("dark", "true");
+					} else {
+						document.documentElement.removeAttribute("data-theme");
+						url.searchParams.set("dark", "false");
+					}
+					window.history.pushState({}, "", url.toString());
+				}
+			}
+		}
+	}
+
+	class ShowSourceButton extends ToggleButton {
+		#dialog = document.getElementById(
+			"__playground-source-dialog",
+		) as HTMLDialogElement | null;
+		#observer = new MutationObserver(this.#handleMutation.bind(this));
+
+		public connectedCallback() {
+			super.connectedCallback();
+			this.#observer.observe(this, { attributes: true });
+			this.#dialog?.addEventListener(
+				"close",
+				this.#handleClose.bind(this),
+			);
+		}
+
+		public disconnectedCallback() {
+			super.disconnectedCallback();
+			this.#observer.disconnect();
+			this.#dialog?.removeEventListener(
+				"close",
+				this.#handleClose.bind(this),
+			);
+		}
+
+		#handleClose() {
+			this.setAttribute("aria-pressed", "false");
+		}
+
+		#handleMutation(mutations: Array<MutationRecord>) {
+			for (const mutation of mutations) {
+				if (mutation.attributeName === "aria-pressed") {
+					const pressed =
+						this.getAttribute("aria-pressed") === "true";
+					if (pressed) {
+						this.#dialog?.showModal();
+					} else {
+						this.#dialog?.close();
+					}
+				}
+			}
+		}
+	}
+
+	window.customElements.define("pg-toggle-button", ToggleButton, {
+		extends: "button",
+	});
+	window.customElements.define("pg-rtl-button", LeftToRightButton, {
+		extends: "button",
+	});
+	window.customElements.define("pg-dark-mode-button", DarkModeButton, {
+		extends: "button",
+	});
+	window.customElements.define("pg-show-source-button", ShowSourceButton, {
+		extends: "button",
+	});
+</script>

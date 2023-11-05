@@ -1,5 +1,72 @@
 ---
-import Badge from "./Badge.astro";
+import Badge, { type BadgeColor, type BadgeVariant } from "./Badge.astro";
+
+const colors: Array<{ label: string; value: BadgeColor }> = [
+	{
+		label: "Primary",
+		value: "primary",
+	},
+	{
+		label: "Success",
+		value: "success",
+	},
+	{
+		label: "Warning",
+		value: "warning",
+	},
+	{
+		label: "Danger",
+		value: "danger",
+	},
+	{
+		label: "Gray",
+		value: "gray",
+	},
+];
+
+const variants: Array<{ label: string; value: BadgeVariant }> = [
+	{
+		label: "Solid",
+		value: "solid",
+	},
+	{
+		label: "Soft",
+		value: "soft",
+	},
+	{
+		label: "Surface",
+		value: "surface",
+	},
+	{
+		label: "Outline",
+		value: "outline",
+	},
+];
 ---
 
-<Badge color="primary" variant="solid">New</Badge>
+<table
+	class="[&_th]:text-grayA-11 [&_td:first-child]:text-grayA-11 border-collapse [&_td:first-child]:min-w-[4rem] [&_td:first-child]:text-xs [&_td]:pb-4 [&_td]:pr-4 [&_th]:pb-4 [&_th]:pr-4 [&_th]:text-center [&_th]:text-xs"
+>
+	<thead>
+		<tr>
+			<th></th>
+			{colors.map((color) => <th>{color.label}</th>)}
+		</tr>
+	</thead>
+	<tbody>
+		{
+			variants.map((variant) => (
+				<tr>
+					<td>{variant.label}</td>
+					{colors.map((color) => (
+						<td>
+							<Badge color={color.value} variant={variant.value}>
+								New
+							</Badge>
+						</td>
+					))}
+				</tr>
+			))
+		}
+	</tbody>
+</table>

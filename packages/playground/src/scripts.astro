@@ -1,0 +1,28 @@
+<script is:inline>
+	if (window.location.search.includes("dir=rtl")) {
+		document.documentElement.dir = "rtl";
+	}
+
+	if (window.location.search.includes("dark=true")) {
+		document.documentElement.dataset.theme = "dark";
+	} else if (window.location.search.includes("dark=false")) {
+		document.documentElement.removeAttribute("data-theme");
+	} else {
+		document.documentElement.dataset.theme = "dark";
+	}
+</script>
+
+<script is:inline>
+	(function () {
+		function uncloak() {
+			const style = document.getElementById("__playground-nav-cloak");
+			style.remove();
+		}
+
+		if (document.readyState === "complete") {
+			uncloak();
+		} else {
+			document.addEventListener("DOMContentLoaded", uncloak);
+		}
+	})();
+</script>

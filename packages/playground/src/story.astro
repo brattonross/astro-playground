@@ -1,0 +1,27 @@
+---
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import Layout from "{{layout}}";
+import { kebabCase, type Story } from "./shared.ts";
+
+export async function getStaticPaths() {
+	const files: Array<any> = await Astro.glob("{{stories}}");
+	return files.map((file) => {
+		const parts = path.basename(file.file, ".stories.astro").split("--");
+		const slug = parts.map(kebabCase).join("/");
+		return {
+			params: { slug },
+			props: {
+				story: file,
+			},
+		};
+	});
+}
+
+const { story } = Astro.props;
+const storySource = await fs.readFile(story.file, "utf-8");
+---
+
+<Layout storySource={storySource}>
+	<story.default />
+</Layout>

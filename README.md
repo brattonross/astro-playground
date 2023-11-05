@@ -40,7 +40,7 @@ Components
 
 ## Layout
 
-If you want to add some custom styles and scripts to the playground, the `layout` option can be provided with a path to the component you want to use as the layout. Remember to use a `<slot>` to render the story content!
+Complete control over the layout is exposed, so you can customize as much or as little as you'd like. To use a layout, add the `layout` option to the integration:
 
 ```js
 // astro.config.mjs
@@ -58,14 +58,68 @@ export default defineConfig({
 });
 ```
 
-A basic layout might look like:
+The various components that make up the default layout are available from the `@brattonross/astro-playground/components` import, so you can compose them as you need. A typical use case might be to inject some global styles or scripts on the page, in which case the default layout can be imported:
 
 ```astro
 ---
+import { Layout } from "@brattonross/astro-playground/components";
 import "~/styles.css";
 ---
 
-<slot />
+<Layout>
+	<slot />
+</Layout>
+```
+
+The default layout exposes a `head` slot, which can be used to inject content into the `<head>` of the page. For example, to add a custom title:
+
+```astro
+---
+import { Layout } from "@brattonross/astro-playground/components";
+---
+
+<Layout>
+	<Fragment slot="head">
+		<title>My Custom Playground</title>
+	</Fragment>
+	<slot />
+</Layout>
+```
+
+You can take more control over the layout by importing the individual components:
+
+```astro
+---
+import {
+	Actions,
+	Main,
+	Meta,
+	Root,
+	Scripts,
+	Sidebar,
+	Styles,
+} from "@brattonross/astro-playground/components";
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<Meta />
+		<Scripts />
+		<Styles />
+		<title>My Custom Playground</title>
+	</head>
+	<body>
+		<Root>
+			<Main>
+				<h1>My Custom Playground</h1>
+				<slot />
+			</Main>
+			<Sidebar />
+			<Actions />
+		</Root>
+	</body>
+</html>
 ```
 
 ## TODO

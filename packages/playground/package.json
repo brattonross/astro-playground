@@ -36,7 +36,11 @@
 			"types": "./dist/index.d.ts"
 		},
 		"./index.astro": "./dist/index.astro",
-		"./story.astro": "./dist/story.astro"
+		"./story.astro": "./dist/story.astro",
+		"./components": {
+			"import": "./dist/components.ts",
+			"types": "./dist/components.ts"
+		}
 	},
 	"scripts": {
 		"build": "tsup",

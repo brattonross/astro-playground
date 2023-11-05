@@ -1,5 +1,11 @@
 ---
+import { Layout as PlaygroundLayout } from "@brattonross/astro-playground/components";
 import "~/main.css";
 ---
 
-<slot />
+<PlaygroundLayout>
+	<Fragment slot="head">
+		<title>Playground</title>
+	</Fragment>
+	<slot />
+</PlaygroundLayout>

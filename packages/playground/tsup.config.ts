@@ -7,6 +7,11 @@ export default defineConfig({
 	format: "esm",
 	sourcemap: true,
 	onSuccess: async () => {
-		await fs.cp("./src/tree-item.astro", "./dist/tree-item.astro");
+		const files = await fs.readdir("src");
+		await Promise.all(
+			files
+				.filter((file) => file !== "index.ts")
+				.map((file) => fs.copyFile(`src/${file}`, `dist/${file}`)),
+		);
 	},
 });
