@@ -8,14 +8,16 @@ const filename = parts.join("--");
 let filepath: string | undefined = undefined;
 let source: string | undefined = undefined;
 
-const storyModules = await Astro.glob("{{stories}}");
-const storyMod = storyModules.find((file) =>
-	file.file.toLowerCase().includes(filename),
-);
+if (filename) {
+	const storyModules = await Astro.glob("{{stories}}");
+	const storyMod = storyModules.find((file) =>
+		file.file.toLowerCase().includes(filename),
+	);
 
-if (storyMod) {
-	filepath = storyMod.file.slice(storyMod.file.indexOf("/src/") + 1);
-	source = await fs.readFile(storyMod.file, "utf8");
+	if (storyMod) {
+		filepath = storyMod.file.slice(storyMod.file.indexOf("/src/") + 1);
+		source = await fs.readFile(storyMod.file, "utf8");
+	}
 }
 ---
 
