@@ -2,7 +2,12 @@
 import { parseStories } from "./shared.ts";
 import StoryTreeItem from "./story-tree-item.astro";
 
-const files = await Astro.glob("{{stories}}");
+let files: Array<any> = [];
+try {
+	files = await Astro.glob("{{stories}}");
+} catch (err) {
+	console.error("Failed to find stories.", err);
+}
 const stories = parseStories("{{path}}", files);
 ---
 
